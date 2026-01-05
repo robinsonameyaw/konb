@@ -1,0 +1,287 @@
+Got it 👍 — you want the **Call** and **SMS** buttons removed (since they’re not working), and when someone submits the booking form, the details should automatically be sent to the manager via WhatsApp. Here’s the edited version of your code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KONB Hostel | Official Booking 2026</title>
+
+<style>
+:root {
+    --primary: #2d5a27;
+    --secondary: #4f772d;
+    --bg: #fdfcf0;
+    --white: #ffffff;
+    --text: #222;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* SECTION TRANSITIONS */
+.view-section {
+    display: none;
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.view-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* HEADER */
+header {
+    background-color: var(--primary);
+    color: white;
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+
+/* CONTACT BUTTONS */
+.contact-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.contact-btn {
+    background: var(--white);
+    color: var(--primary);
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.contact-btn:active {
+    transform: scale(0.95);
+}
+
+/* ROOMS */
+.room-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.room-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.room-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.room-info {
+    padding: 20px;
+}
+
+.price {
+    font-size: 1.3rem;
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+/* DETAIL VIEW */
+.detail-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.detail-img {
+    flex: 1;
+    min-width: 300px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.booking-form {
+    flex: 1;
+    min-width: 300px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.submit-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>KONB Hostel</h1>
+    <p>3-in-a-room • GH₵ 3,000 / Semester • 2026 Admissions</p>
+
+    <div class="contact-bar">
+        <a href="https://wa.me/233536522413?text=Hello%20I%20want%20to%20book%20a%20room%20at%20KONB%20Hostel."
+           target="_blank"
+           class="contact-btn">💬 WhatsApp Manager</a>
+    </div>
+</header>
+
+<section id="homeView" class="view-section active">
+    <div class="room-container">
+
+        <div class="room-card" onclick="openRoom('Male')">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80" alt="Male Room">
+            <div class="room-info">
+                <h3>Male Room</h3>
+                <p class="price">GH₵ 3,000 / Semester</p>
+                <p>Available: <strong id="mCount">3</strong> rooms</p>
+            </div>
+        </div>
+
+        <div class="room-card" onclick="openRoom('Female')">
+            <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80" alt="Female Room">
+            <div class="room-info">
+                <h3>Female Room</h3>
+                <p class="price">GH₵ 3,000 / Semester</p>
+                <p>Available: <strong id="fCount">3</strong> rooms</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section id="detailView" class="view-section">
+    <button onclick="goHome()" style="background:none;border:none;color:var(--primary);font-weight:bold;cursor:pointer;">
+        ← Back to Rooms
+    </button>
+
+    <div class="detail-flex">
+        <img id="detailImg" class="detail-img" src="" alt="Room Detail">
+
+        <div class="booking-form">
+            <h2 id="detailTitle"></h2>
+            <p id="detailDesc" style="color:#555;margin:10px 0;"></p>
+
+            <form onsubmit="handleBooking(event)">
+                <input id="fullName" type="text" placeholder="Full Name" required>
+                <input id="schoolName" type="text" placeholder="School" required>
+
+                <select id="genderSelect" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+
+                <input id="phoneNumber" type="tel" placeholder="Your Phone Number" required>
+                <button class="submit-btn">Submit Booking Application</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+const roomInfo = {
+    Male: {
+        title: "Male Student Suite",
+        desc: "Secure 3-in-a-room setup with desks, lockers, and constant water supply.",
+        img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80",
+        available: 3
+    },
+    Female: {
+        title: "Female Student Suite",
+        desc: "Comfortable 3-in-a-room living with security, internet, and a quiet environment.",
+        img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80",
+        available: 3
+    }
+};
+
+function openRoom(type) {
+    const data = roomInfo[type];
+    detailTitle.innerText = data.title;
+    detailDesc.innerText = data.desc;
+    detailImg.src = data.img;
+    genderSelect.value = type;
+
+    homeView.classList.remove("active");
+    detailView.classList.add("active");
+    window.scrollTo(0, 0);
+}
+
+function goHome() {
+    detailView.classList.remove("active");
+    homeView.classList.add("active");
+}
+
+function handleBooking(e) {
+    e.preventDefault();
+    const type = genderSelect.value;
+    const name = document.getElementById("fullName").value;
+    const school = document.getElementById("schoolName").value;
+    const phone = document.getElementById("phoneNumber").value;
+
+    if (roomInfo[type].available > 0) {
+        roomInfo[type].available--;
+        mCount.innerText = roomInfo.Male.available;
+        fCount.innerText = roomInfo.Female.available;
+
+        // WhatsApp message
+        const message = `Hello, I want to book a room at KONB Hostel.%0A
+Name: ${name}%0A
+School: ${school}%0A
+Gender: ${type}%0A
+Phone: ${phone}`;
+        const whatsappUrl = `https://wa.me/233536522413?text=${message}`;
+        window.open(whatsappUrl, "_blank");
+
+        goHome();
+    } else {
+        alert("Sorry, this room is fully booked.");
+    }
+}
+</script>
+
+</body>
+</html>
+```
